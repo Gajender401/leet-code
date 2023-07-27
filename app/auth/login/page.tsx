@@ -1,5 +1,5 @@
 'use client'
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import {useUserAuth} from '@/src/context/UserAuthContext'

@@ -27,20 +27,6 @@ export function UserAuthContextProvider({ children }) {
       setUser(currentuser);
       console.log(currentuser);
 
-      const docRef = doc(db, "users", currentuser.email, 'user-data', 'user-data' );
-      const docSnap = await getDoc(docRef);
-      
-      if (!docSnap.exists()) {
-        // setDoc
-      }
-
-      try {
-        // snapshot user data
-      } catch (error) {
-        
-      }
-
-
     });
 
     return () => {

@@ -23,6 +23,7 @@ export default function RootLayout({
           <ToasterContext />
           {children}
         </body>
-      </UserAuthContextProvider>    </html>
+      </UserAuthContextProvider>    
+    </html>
   )
 }
