@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { doc, setDoc } from "firebase/firestore";
 import { toast } from "react-hot-toast";
+import {useUserAuth} from '@/src/context/UserAuthContext'
 
 type SignupProps = {};
 
@@ -11,6 +12,8 @@ const Signup: React.FC<SignupProps> = () => {
     const [inputs, setInputs] = useState({ email: "", displayName: "", password: "" });
     const router = useRouter();
 
+    const {signUp} = useUserAuth()
+
     const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
@@ -18,7 +21,7 @@ const Signup: React.FC<SignupProps> = () => {
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!inputs.email || !inputs.password || !inputs.displayName) return alert("Please fill all fields");
-
+        
     };
 
 
