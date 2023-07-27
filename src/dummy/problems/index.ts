@@ -1,4 +1,4 @@
-import { Problem } from "../types/problem";
+import { Problem } from "@/src/types/problem";
 import { jumpGame } from "./jump-game";
 import { reverseLinkedList } from "./reverse-linked-list";
 import { search2DMatrix } from "./search-a-2d-matrix";

@@ -1,5 +1,5 @@
 import assert from "assert";
-import { Problem } from "../types/problem";
+import { Problem } from "@/src/types/problem";
 
 const starterCodeTwoSum = `function twoSum(nums,target){
   // Write your code here

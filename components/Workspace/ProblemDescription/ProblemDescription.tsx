@@ -7,6 +7,8 @@ import { AiFillLike, AiFillDislike, AiOutlineLoading3Quarters, AiFillStar } from
 import { BsCheck2Circle } from "react-icons/bs";
 import { TiStarOutline } from "react-icons/ti";
 import { toast } from "react-hot-toast";
+import { useUserAuth } from '@/src/context/UserAuthContext'
+import {db} from '@/src/lib/firebase'
 
 type ProblemDescriptionProps = {
 	problem: Problem;
@@ -14,24 +16,142 @@ type ProblemDescriptionProps = {
 };
 
 const ProblemDescription: React.FC<ProblemDescriptionProps> = ({ problem, _solved }) => {
+	const {user} = useUserAuth();
+
 	const { currentProblem, loading, problemDifficultyClass, setCurrentProblem } = useGetCurrentProblem(problem.id);
 	const { liked, disliked, solved, setData, starred } = useGetUsersDataOnProblem(problem.id);
 	const [updating, setUpdating] = useState(false);
 
 	const returnUserDataAndProblemData = async (transaction: any) => {
-		//
+		const userRef = doc(db, "users", user!.uid);
+		const problemRef = doc(db, "problems", problem.id);
+		const userDoc = await transaction.get(userRef);
+		const problemDoc = await transaction.get(problemRef);
+		return { userDoc, problemDoc, userRef, problemRef };
 	};
 
 	const handleLike = async () => {
-		//
+		if (!user) {
+			toast.error("You must be logged in to like a problem");
+			return;
+		}
+		if (updating) return;
+		setUpdating(true);
+		await runTransaction(db, async (transaction) => {
+			const { problemDoc, userDoc, problemRef, userRef } = await returnUserDataAndProblemData(transaction);
+
+			if (userDoc.exists() && problemDoc.exists()) {
+				if (liked) {
+					// remove problem id from likedProblems on user document, decrement likes on problem document
+					transaction.update(userRef, {
+						likedProblems: userDoc.data().likedProblems.filter((id: string) => id !== problem.id),
+					});
+					transaction.update(problemRef, {
+						likes: problemDoc.data().likes - 1,
+					});
+
+					setCurrentProblem((prev) => (prev ? { ...prev, likes: prev.likes - 1 } : null));
+					setData((prev) => ({ ...prev, liked: false }));
+				} else if (disliked) {
+					transaction.update(userRef, {
+						likedProblems: [...userDoc.data().likedProblems, problem.id],
+						dislikedProblems: userDoc.data().dislikedProblems.filter((id: string) => id !== problem.id),
+					});
+					transaction.update(problemRef, {
+						likes: problemDoc.data().likes + 1,
+						dislikes: problemDoc.data().dislikes - 1,
+					});
+
+					setCurrentProblem((prev) =>
+						prev ? { ...prev, likes: prev.likes + 1, dislikes: prev.dislikes - 1 } : null
+					);
+					setData((prev) => ({ ...prev, liked: true, disliked: false }));
+				} else {
+					transaction.update(userRef, {
+						likedProblems: [...userDoc.data().likedProblems, problem.id],
+					});
+					transaction.update(problemRef, {
+						likes: problemDoc.data().likes + 1,
+					});
+					setCurrentProblem((prev) => (prev ? { ...prev, likes: prev.likes + 1 } : null));
+					setData((prev) => ({ ...prev, liked: true }));
+				}
+			}
+		});
+		setUpdating(false);
 	};
 
 	const handleDislike = async () => {
-		//
+		if (!user) {
+			toast.error("You must be logged in to dislike a problem");
+			return;
+		}
+		if (updating) return;
+		setUpdating(true);
+		await runTransaction(db, async (transaction) => {
+			const { problemDoc, userDoc, problemRef, userRef } = await returnUserDataAndProblemData(transaction);
+			if (userDoc.exists() && problemDoc.exists()) {
+				// already disliked, already liked, not disliked or liked
+				if (disliked) {
+					transaction.update(userRef, {
+						dislikedProblems: userDoc.data().dislikedProblems.filter((id: string) => id !== problem.id),
+					});
+					transaction.update(problemRef, {
+						dislikes: problemDoc.data().dislikes - 1,
+					});
+					setCurrentProblem((prev) => (prev ? { ...prev, dislikes: prev.dislikes - 1 } : null));
+					setData((prev) => ({ ...prev, disliked: false }));
+				} else if (liked) {
+					transaction.update(userRef, {
+						dislikedProblems: [...userDoc.data().dislikedProblems, problem.id],
+						likedProblems: userDoc.data().likedProblems.filter((id: string) => id !== problem.id),
+					});
+					transaction.update(problemRef, {
+						dislikes: problemDoc.data().dislikes + 1,
+						likes: problemDoc.data().likes - 1,
+					});
+					setCurrentProblem((prev) =>
+						prev ? { ...prev, dislikes: prev.dislikes + 1, likes: prev.likes - 1 } : null
+					);
+					setData((prev) => ({ ...prev, disliked: true, liked: false }));
+				} else {
+					transaction.update(userRef, {
+						dislikedProblems: [...userDoc.data().dislikedProblems, problem.id],
+					});
+					transaction.update(problemRef, {
+						dislikes: problemDoc.data().dislikes + 1,
+					});
+					setCurrentProblem((prev) => (prev ? { ...prev, dislikes: prev.dislikes + 1 } : null));
+					setData((prev) => ({ ...prev, disliked: true }));
+				}
+			}
+		});
+		setUpdating(false);
 	};
 
 	const handleStar = async () => {
-		// 
+		if (!user) {
+			toast.error("You must be logged in to star a problem");
+			return;
+		}
+		if (updating) return;
+		setUpdating(true);
+
+		if (!starred) {
+			const userRef = doc(db, "users", user.uid);
+			await updateDoc(userRef, {
+				starredProblems: arrayUnion(problem.id),
+			});
+			setData((prev) => ({ ...prev, starred: true }));
+		} else {
+			const userRef = doc(db, "users", user.uid);
+			await updateDoc(userRef, {
+				starredProblems: arrayRemove(problem.id),
+			});
+			setData((prev) => ({ ...prev, starred: false }));
+		}
+
+		setUpdating(false);
 	};
 
 	return (
@@ -153,7 +273,25 @@ function useGetCurrentProblem(problemId: string) {
 
 	useEffect(() => {
 		// Get problem from DB
-
+		const getCurrentProblem = async () => {
+			setLoading(true);
+			const docRef = doc(db, "problems", problemId);
+			const docSnap = await getDoc(docRef);
+			if (docSnap.exists()) {
+				const problem = docSnap.data();
+				setCurrentProblem({ id: docSnap.id, ...problem } as DBProblem);
+				// easy, medium, hard
+				setProblemDifficultyClass(
+					problem.difficulty === "Easy"
+						? "bg-olive text-olive"
+						: problem.difficulty === "Medium"
+						? "bg-dark-yellow text-dark-yellow"
+						: " bg-dark-pink text-dark-pink"
+				);
+			}
+			setLoading(false);
+		};
+		getCurrentProblem();
 	}, [problemId]);
 
 	return { currentProblem, loading, problemDifficultyClass, setCurrentProblem };
@@ -161,11 +299,27 @@ function useGetCurrentProblem(problemId: string) {
 
 function useGetUsersDataOnProblem(problemId: string) {
 	const [data, setData] = useState({ liked: false, disliked: false, starred: false, solved: false });
+	const {user} = useUserAuth();
 
 	useEffect(() => {
-		//
+		const getUsersDataOnProblem = async () => {
+			const userRef = doc(db, "users", user!.uid);
+			const userSnap = await getDoc(userRef);
+			if (userSnap.exists()) {
+				const data = userSnap.data();
+				const { solvedProblems, likedProblems, dislikedProblems, starredProblems } = data;
+				setData({
+					liked: likedProblems.includes(problemId), // likedProblems["two-sum","jump-game"]
+					disliked: dislikedProblems.includes(problemId),
+					starred: starredProblems.includes(problemId),
+					solved: solvedProblems.includes(problemId),
+				});
+			}
+		};
 
-	}, [problemId]);
+		if (user) getUsersDataOnProblem();
+		return () => setData({ liked: false, disliked: false, starred: false, solved: false });
+	}, [problemId, user]);
 
 	return { ...data, setData };
 }

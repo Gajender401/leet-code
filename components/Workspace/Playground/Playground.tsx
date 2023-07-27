@@ -8,9 +8,10 @@ import EditorFooter from "./EditorFooter";
 import { Problem } from "@/src/types/problem";
 import { toast } from "react-hot-toast";
 import { problems } from "@/src/dummy/problems";
-import { useRouter } from "next/navigation";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import useLocalStorage from "@/src/hooks/useLocalStorage";
+import { useUserAuth } from '@/src/context/UserAuthContext'
+import { useSearchParams } from 'next/navigation'
 
 type PlaygroundProps = {
 	problem: Problem;
@@ -25,10 +26,15 @@ export interface ISettings {
 }
 
 const Playground: React.FC<PlaygroundProps> = ({ problem, setSuccess, setSolved }) => {
+
 	const [activeTestCaseId, setActiveTestCaseId] = useState<number>(0);
 	let [userCode, setUserCode] = useState<string>(problem.starterCode);
-
 	const [fontSize, setFontSize] = useLocalStorage("lcc-fontSize", "16px");
+
+	const { user } = useUserAuth();
+	const searchParams = useSearchParams()
+	const id = searchParams.get('id')
+
 
 	const [settings, setSettings] = useState<ISettings>({
 		fontSize: fontSize,
@@ -37,14 +43,65 @@ const Playground: React.FC<PlaygroundProps> = ({ problem, setSuccess, setSolved 
 	});
 
 
-	const handleSubmit = async () => {
-		//
-	};
+
+
+	useEffect(() => {
+		const code = localStorage.getItem(`code-${id}`);
+		if (user) {
+			setUserCode(code ? JSON.parse(code) : problem.starterCode);
+		} else {
+			setUserCode(problem.starterCode);
+		}
+	}, [id, user, problem.starterCode]);
 
 
 	const onChange = (value: string) => {
-		//
+		setUserCode(value);
+		localStorage.setItem(`code-${id}`, JSON.stringify(value));
 	};
+
+	const handleSubmit = async () => {
+		if (!user) {
+			toast.error("Please login to submit your code");
+			return;
+		}
+		try {
+			userCode = userCode.slice(userCode.indexOf(problem.starterFunctionName));
+			const cb = new Function(`return ${userCode}`)();
+			const handler = problems[id as string].handlerFunction;
+
+			if (typeof handler === "function") {
+				const success = handler(cb);
+				if (success) {
+					toast.success("Congrats! All tests passed!", {
+						position: "top-center",
+						autoClose: 3000,
+						theme: "dark",
+					});
+					setSuccess(true);
+					setTimeout(() => {
+						setSuccess(false);
+					}, 4000);
+
+					const userRef = doc(firestore, "users", user.uid);
+					await updateDoc(userRef, {
+						solvedProblems: arrayUnion(pid),
+					});
+					setSolved(true);
+				}
+			}
+		} catch (error: any) {
+			console.log(error.message);
+			if (
+				error.message.startsWith("AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:")
+			) {
+				toast.error("Oops! One or more test cases failed");
+			} else {
+				toast.error(error.message);
+			}
+		}
+	};
+
 
 	return (
 		<div className='flex flex-col bg-dark-layer-1 relative overflow-x-hidden'>
