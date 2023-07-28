@@ -13,6 +13,7 @@ import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import useLocalStorage from "@/src/hooks/useLocalStorage";
 import { useUserAuth } from '@/src/context/UserAuthContext'
 import { useSearchParams } from 'next/navigation'
+import { db } from "@/src/lib/firebase";
 
 type PlaygroundProps = {
 	problem: Problem;
@@ -74,19 +75,15 @@ const Playground: React.FC<PlaygroundProps> = ({ problem, setSuccess, setSolved 
 			if (typeof handler === "function") {
 				const success = handler(cb);
 				if (success) {
-					toast.success("Congrats! All tests passed!", {
-						position: "top-center",
-						autoClose: 3000,
-						theme: "dark",
-					});
+					toast.success("Congrats! All tests passed!");
 					setSuccess(true);
 					setTimeout(() => {
 						setSuccess(false);
 					}, 4000);
 
-					const userRef = doc(firestore, "users", user.uid);
+					const userRef = doc(db, "users", user.uid);
 					await updateDoc(userRef, {
-						solvedProblems: arrayUnion(pid),
+						solvedProblems: arrayUnion(id),
 					});
 					setSolved(true);
 				}

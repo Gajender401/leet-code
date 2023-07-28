@@ -10,6 +10,7 @@ import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/fires
 import { db } from "@/src/lib/firebase";
 import { DBProblem } from "@/src/types/problem";
 import { useUserAuth } from '@/src/context/UserAuthContext'
+import { problems } from "./mock";
 
 type ProblemsTableProps = {
 	setLoadingProblems: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,7 +21,7 @@ const ProblemsTable: React.FC<ProblemsTableProps> = ({ setLoadingProblems }) => 
 		isOpen: false,
 		videoId: "",
 	});
-	const problems = useGetProblems(setLoadingProblems);
+	// const problems = useGetProblems(setLoadingProblems);
 	const solvedProblems = useGetSolvedProblems();
 	console.log("solvedProblems", solvedProblems);
 	const closeModal = () => {
@@ -36,6 +37,52 @@ const ProblemsTable: React.FC<ProblemsTableProps> = ({ setLoadingProblems }) => 
 		return () => window.removeEventListener("keydown", handleEsc);
 	}, []);
 
+
+	function useGetProblems(setLoadingProblems: React.Dispatch<React.SetStateAction<boolean>>) {
+		const [problems, setProblems] = useState<DBProblem[]>([]);
+
+		useEffect(() => {
+			const getProblems = async () => {
+				// fetching data logic
+				setLoadingProblems(true);
+				const q = query(collection(db, "problems"), orderBy("order", "asc"));
+				const querySnapshot = await getDocs(q);
+				const tmp: DBProblem[] = [];
+				querySnapshot.forEach((doc) => {
+					tmp.push({ id: doc.id, ...doc.data() } as DBProblem);
+				});
+				setProblems(tmp);
+				setLoadingProblems(false);
+			};
+
+			getProblems();
+		}, [setLoadingProblems]);
+		return problems;
+	}
+
+
+	function useGetSolvedProblems() {
+		const [solvedProblems, setSolvedProblems] = useState<string[]>([]);
+		const { user } = useUserAuth();
+
+		useEffect(() => {
+			const getSolvedProblems = async () => {
+				const userRef = doc(db, "users", user!.uid);
+				const userDoc = await getDoc(userRef);
+
+				if (userDoc.exists()) {
+					setSolvedProblems(userDoc.data().solvedProblems);
+				}
+			};
+
+			if (user) getSolvedProblems();
+			if (!user) setSolvedProblems([]);
+		}, [user]);
+
+		return solvedProblems;
+	}
+
+
 	return (
 		<>
 			<tbody className='text-white'>
@@ -44,8 +91,8 @@ const ProblemsTable: React.FC<ProblemsTableProps> = ({ setLoadingProblems }) => 
 						problem.difficulty === "Easy"
 							? "text-dark-green-s"
 							: problem.difficulty === "Medium"
-							? "text-dark-yellow"
-							: "text-dark-pink";
+								? "text-dark-yellow"
+								: "text-dark-pink";
 					return (
 						<tr className={`${idx % 2 == 1 ? "bg-dark-layer-1" : ""}`} key={problem.id}>
 							<th className='px-2 py-4 font-medium whitespace-nowrap text-dark-green-s'>
@@ -117,45 +164,3 @@ const ProblemsTable: React.FC<ProblemsTableProps> = ({ setLoadingProblems }) => 
 };
 export default ProblemsTable;
 
-function useGetProblems(setLoadingProblems: React.Dispatch<React.SetStateAction<boolean>>) {
-	const [problems, setProblems] = useState<DBProblem[]>([]);
-
-	useEffect(() => {
-		const getProblems = async () => {
-			// fetching data logic
-			setLoadingProblems(true);
-			const q = query(collection(db, "problems"), orderBy("order", "asc"));
-			const querySnapshot = await getDocs(q);
-			const tmp: DBProblem[] = [];
-			querySnapshot.forEach((doc) => {
-				tmp.push({ id: doc.id, ...doc.data() } as DBProblem);
-			});
-			setProblems(tmp);
-			setLoadingProblems(false);
-		};
-
-		getProblems();
-	}, [setLoadingProblems]);
-	return problems;
-}
-
-function useGetSolvedProblems() {
-	const [solvedProblems, setSolvedProblems] = useState<string[]>([]);
-	const { user } = useUserAuth();
-
-	useEffect(() => {
-		const getSolvedProblems = async () => {
-			const userRef = doc(db, "users", user!.uid);
-			const userDoc = await getDoc(userRef);
-
-			if (userDoc.exists()) {
-				setSolvedProblems(userDoc.data().solvedProblems);
-			}
-		};
-
-		if (user) getSolvedProblems();
-		if (!user) setSolvedProblems([]);
-	}, [user]);
-
-	return solvedProblems;
-}

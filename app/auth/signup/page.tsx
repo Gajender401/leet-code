@@ -11,7 +11,7 @@ type SignupProps = {};
 
 const Signup: React.FC<SignupProps> = () => {
 
-    const [inputs, setInputs] = useState({ email: "", displayName: "", password: "" });
+    const [inputs, setInputs] = useState({ email: "", username: "", password: "" });
     const router = useRouter();
 
     const { signUp } = useUserAuth()
@@ -22,10 +22,10 @@ const Signup: React.FC<SignupProps> = () => {
 
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!inputs.email || !inputs.password || !inputs.displayName) return toast.error("Please fill all fields");
+        if (!inputs.email || !inputs.password || !inputs.username) return toast.error("Please fill all fields");
         else {
-            signUp(inputs.email, inputs.password, inputs.displayName)
-            router.push('/')
+           await signUp(inputs.email, inputs.password, inputs.username)
+           router.push('/')
         }
     };
 
@@ -37,10 +37,11 @@ const Signup: React.FC<SignupProps> = () => {
                 <Navbar />
                 <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
                     <div className="w-96 flex items-center flex-col bg-white rounded-sm shadow-md p-8">
-                        <Image className="mb-10" src='/logo2.svg' height={70} width={100} alt="logo" />                       
-                        <form className="space-y-4 w-full ">
+                        <Image className="mb-10" src='/logo2.svg' height={70} width={100} alt="logo" />
+                        <form onSubmit={handleRegister} className="space-y-4 w-full ">
                             <div>
                                 <input
+                                    onChange={handleChangeInput}
                                     type="text"
                                     id="username"
                                     name="username"
@@ -51,6 +52,7 @@ const Signup: React.FC<SignupProps> = () => {
                             </div>
                             <div>
                                 <input
+                                    onChange={handleChangeInput}
                                     type="email"
                                     id="email"
                                     name="email"
@@ -62,6 +64,7 @@ const Signup: React.FC<SignupProps> = () => {
                             </div>
                             <div>
                                 <input
+                                    onChange={handleChangeInput}
                                     type="password"
                                     id="password"
                                     name="password"
@@ -73,6 +76,7 @@ const Signup: React.FC<SignupProps> = () => {
                             </div>
                             <div>
                                 <input
+                                    onChange={handleChangeInput}
                                     type="password"
                                     id="confirmPassword"
                                     name="confirmPassword"
@@ -85,13 +89,13 @@ const Signup: React.FC<SignupProps> = () => {
                             <button
                                 type="submit"
                                 className="w-full py-2 text-white bg-gradient-to-r from-[#37474f] to-[#546e7a] font-semibold rounded-md transition-all hover:from-[#838b8f] hover:to-[#4e5d65]"
-                                >
+                            >
                                 Sign Up
                             </button>
                         </form>
                         <p className="text-[#bdbdbd] text-center mt-4">
                             Have an account?{" "}
-                            <a href="/signin" className="text-[#546e7a]">
+                            <a href="/auth/login" className="text-[#546e7a]">
                                 Sign In
                             </a>
                         </p>

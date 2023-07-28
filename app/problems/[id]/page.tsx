@@ -7,12 +7,10 @@ import { problems } from "@/src/dummy/problems";
 import { Problem } from "@/src/types/problem";
 import React from "react";
 
-type ProblemPageProps = {
-	problem: Problem;
-};
-
-const ProblemPage: React.FC<ProblemPageProps> = ({ problem }) => {
+const ProblemPage = ({ params }: { params: { id: string } }) => {
 	const hasMounted = useHasMounted();
+	const { id } = params;
+	const problem = problems[id];
 
 	if (!hasMounted) return null;
 
@@ -39,21 +37,3 @@ export async function getStaticPaths() {
 	};
 }
 
-// getStaticProps => it fetch the data
-
-export async function getStaticProps({ params }: { params: { id: string } }) {
-	const { id } = params;
-	const problem = problems[id];
-
-	if (!problem) {
-		return {
-			notFound: true,
-		};
-	}
-	problem.handlerFunction = problem.handlerFunction.toString();
-	return {
-		props: {
-			problem,
-		},
-	};
-}

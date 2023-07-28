@@ -2,48 +2,64 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import {useUserAuth} from '@/src/context/UserAuthContext'
-
+import { useUserAuth } from '@/src/context/UserAuthContext'
+import Navbar from "@/components/Navbar/page";
+import Image from "next/image";
 
 type ResetPasswordProps = {};
 
 const ResetPassword: React.FC<ResetPasswordProps> = () => {
-	const [email, setEmail] = useState("");
+    const [email, setEmail] = useState("");
+    const { resetPassword } = useUserAuth()
 
-	const handleReset = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-	};
+    const handleReset = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (email !== "") {
+            await resetPassword(email)
+            toast.success('Reset link has been sent to your email.')
+        }
+
+    };
 
 
-	return (
-		<form className='space-y-6 px-6 lg:px-8 pb-4 sm:pb-6 xl:pb-8' onSubmit={handleReset}>
-			<h3 className='text-xl font-medium  text-white'>Reset Password</h3>
-			<p className='text-sm text-white '>
-				Forgotten your password? Enter your e-mail address below, and we&apos;ll send you an e-mail allowing you
-				to reset it.
-			</p>
-			<div>
-				<label htmlFor='email' className='text-sm font-medium block mb-2 text-gray-300'>
-					Your email
-				</label>
-				<input
-					type='email'
-					name='email'
-					onChange={(e) => setEmail(e.target.value)}
-					id='email'
-					className='border-2 outline-none sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white'
-					placeholder='name@company.com'
-				/>
-			</div>
-
-			<button
-				type='submit'
-				className={`w-full text-white  focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center 
-                bg-brand-orange hover:bg-brand-orange-s `}
-			>
-				Reset Password
-			</button>
-		</form>
-	);
+    return (
+        <div className='bg-gradient-to-b from-gray-600 to-black h-screen relative'>
+            <div className='max-w-7xl mx-auto'>
+                <Navbar />
+                <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+                    <div className="w-96 flex items-center flex-col bg-white rounded-sm shadow-md p-8">
+                        <Image className="mb-10" src='/logo2.svg' height={70} width={100} alt="logo" />
+                        <form onSubmit={handleReset} className="space-y-4 w-full ">
+                            <div>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    className="w-full px-3 py-2 border rounded-sm focus:outline-none focus:border-blue-500"
+                                    required
+                                    placeholder="Email"
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full py-2 text-white bg-gradient-to-r from-[#37474f] to-[#546e7a] font-semibold rounded-md transition-all hover:from-[#838b8f] hover:to-[#4e5d65]"
+                            >
+                                Reset
+                            </button>
+                        </form>
+                        <p className="text-[#546e7a] w-full flex items-center justify-between mt-4">
+                            <a href="/auth/login" >
+                                Sign In
+                            </a>
+                            <a href="/auth/signup" >
+                                Sign Up
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 };
 export default ResetPassword;

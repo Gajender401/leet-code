@@ -3,13 +3,13 @@ import { getAuth } from "firebase/auth";
 import { getFirestore} from "firebase/firestore"
 
 const firebaseConfig = {
-  apiKey: toString(process.env.FIREBASE_API_KEY),
-  authDomain: toString(process.env.FIREBASE_AUTH_DOMAIN),
-  projectId: toString(process.env.FIREBASE_PROJECT_ID),
-  storageBucket: toString(process.env.FIREBASE_STORAGE_BUCKET),
-  messagingSenderId: toString(process.env.FIREBASE_MESSAGING_SENDER_ID),
-  appId: toString(process.env.FIREBASE_APP_ID),
-  measurementId: toString(process.env.FIREBASE_MEASUREMENT_ID)
+  apiKey: "AIzaSyALiQEhDxqu8tzPr-aysZlGOOMMQKzvZls",
+  authDomain: "leet-code-42a57.firebaseapp.com",
+  projectId: "leet-code-42a57",
+  storageBucket: "leet-code-42a57.appspot.com",
+  messagingSenderId: "973869512715",
+  appId: "1:973869512715:web:5aa91404daaaf0feda2f0e",
+  measurementId: "G-MWWQ0QSX8K"
 };
 
 // Initialize Firebase

@@ -54,14 +54,7 @@ export function UserAuthContextProvider({ children }) {
   }
 
   function resetPassword(email) {
-    sendPasswordResetEmail(auth, email)
-      .then(() => {
-        // Password reset email sent!
-        // ..
-      })
-      .catch((error) => {
-        // ..
-      });
+   return sendPasswordResetEmail(auth, email)
   }
 
 
