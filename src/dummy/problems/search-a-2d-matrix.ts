@@ -1,3 +1,5 @@
+'use client'
+
 import assert from "assert";
 import { Problem } from "@/src/types/problem";
 import example1 from "./images/search-a-2d-1.jpg";

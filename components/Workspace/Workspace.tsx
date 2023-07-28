@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from "react";
 import Split from "react-split";
 import Playground from "./Playground/Playground";

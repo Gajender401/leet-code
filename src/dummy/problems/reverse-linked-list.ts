@@ -1,3 +1,5 @@
+'use client'
+
 import assert from "assert";
 import { Problem } from "@/src/types/problem";
 import example from "./images/reverseLL.jpg";

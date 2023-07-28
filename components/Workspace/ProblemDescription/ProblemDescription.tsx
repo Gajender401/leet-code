@@ -1,3 +1,4 @@
+'use client'
 import CircleSkeleton from "@/components/Skeletons/CircleSkeleton";
 import RectangleSkeleton from "@/components/Skeletons/RectangleSkeleton";
 import { DBProblem, Problem } from "@/src/types/problem";

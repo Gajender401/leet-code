@@ -1,3 +1,4 @@
+'use client'
 import { BsCheckLg, BsChevronDown } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
 import { ISettings } from "../Workspace/Playground/Playground";

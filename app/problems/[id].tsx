@@ -1,3 +1,5 @@
+'use client'
+
 import Topbar from "@/components/Topbar/Topbar";
 import Workspace from "@/components/Workspace/Workspace";
 import useHasMounted from "@/src/hooks/useHasMounted";

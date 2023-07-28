@@ -1,3 +1,5 @@
+'use client'
+
 import { Problem } from "@/src/types/problem";
 import { jumpGame } from "./jump-game";
 import { reverseLinkedList } from "./reverse-linked-list";

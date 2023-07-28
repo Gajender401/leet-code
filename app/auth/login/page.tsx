@@ -14,6 +14,7 @@ const Login: React.FC<LoginProps> = () => {
     };
     const [inputs, setInputs] = useState({ email: "", password: "" });
     const router = useRouter();
+    
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };

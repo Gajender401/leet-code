@@ -1,3 +1,5 @@
+'use client'
+
 import assert from "assert";
 import { Problem } from "@/src/types/problem";
 

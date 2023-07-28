@@ -1,14 +1,17 @@
+'use client'
+
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { BsList } from "react-icons/bs";
 import Timer from "../Timer/Timer";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { problems } from "@/src/dummy/problems";
 import { Problem } from "@/src/types/problem";
 import { useUserAuth } from '@/src/context/UserAuthContext'
 import { FiLogOut } from "react-icons/fi";
+import { useSearchParams } from 'next/navigation'
 
 
 type TopbarProps = {
@@ -18,13 +21,16 @@ type TopbarProps = {
 const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
     const { user, logOut } = useUserAuth()
     const router = useRouter();
+    const searchParams = useSearchParams()
+ 
+    const id = searchParams.get('id')
 
     const handleLogout = () => {
 		logOut()
 	};
 
     const handleProblemChange = (isForward: boolean) => {
-        const { order } = problems[router.query.pid as string] as Problem;
+        const { order } = problems[id as string] as Problem;
         const direction = isForward ? 1 : -1;
         const nextProblemOrder = order + direction;
         const nextProblemKey = Object.keys(problems).find((key) => problems[key].order === nextProblemOrder);
@@ -78,7 +84,7 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
                 <div className='flex items-center space-x-4 flex-1 justify-end'>
                     <div>
                         <a
-                            href='https://www.buymeacoffee.com/burakorkmezz'
+                            href='https://www.google.com/'
                             target='_blank'
                             rel='noreferrer'
                             className='bg-dark-fill-3 py-1.5 px-3 cursor-pointer rounded text-brand-orange hover:bg-dark-fill-2'
@@ -88,7 +94,7 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
                     </div>
                     {!user && (
                         <Link
-                            href='/auth'
+                            href='/auth/login'
                         >
                             <button className='bg-dark-fill-3 py-1 px-2 cursor-pointer rounded '>Sign In</button>
                         </Link>
