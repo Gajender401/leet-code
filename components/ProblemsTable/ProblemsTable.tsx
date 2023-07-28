@@ -33,6 +33,8 @@ const ProblemsTable: React.FC<ProblemsTableProps> = ({ setLoadingProblems }) => 
 			if (e.key === "Escape") closeModal();
 		};
 		window.addEventListener("keydown", handleEsc);
+		// remove after production
+		setLoadingProblems(false)
 
 		return () => window.removeEventListener("keydown", handleEsc);
 	}, []);
