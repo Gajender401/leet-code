@@ -23,9 +23,29 @@ export function UserAuthContextProvider({ children }) {
   const provider = new GoogleAuthProvider();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async(currentuser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentuser) => {
       setUser(currentuser);
-      console.log(currentuser);
+      console.log(currentuser.uid);
+      if (currentuser) {
+        const userId = currentuser.uid
+          const userRef = doc(db, "users", userId);
+          const userSnap = await getDoc(userRef);
+          if (!userSnap.exists()) {
+            await setDoc(doc(db, "users", userId), {
+              uid: currentuser.uid,
+              email: currentuser.email,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+              likedProblems: [],
+              dislikedProblems: [],
+              solvedProblems: [],
+              starredProblems: [],
+            });
+          }
+
+      }
+
+
 
     });
 
@@ -54,7 +74,7 @@ export function UserAuthContextProvider({ children }) {
   }
 
   function resetPassword(email) {
-   return sendPasswordResetEmail(auth, email)
+    return sendPasswordResetEmail(auth, email)
   }
 
 

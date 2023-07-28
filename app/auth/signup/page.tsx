@@ -25,6 +25,7 @@ const Signup: React.FC<SignupProps> = () => {
         if (!inputs.email || !inputs.password || !inputs.username) return toast.error("Please fill all fields");
         else {
            await signUp(inputs.email, inputs.password, inputs.username)
+           toast.success('Signed up successfully')
            router.push('/')
         }
     };

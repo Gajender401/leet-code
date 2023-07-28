@@ -9,7 +9,7 @@ import { BsCheck2Circle } from "react-icons/bs";
 import { TiStarOutline } from "react-icons/ti";
 import { toast } from "react-hot-toast";
 import { useUserAuth } from '@/src/context/UserAuthContext'
-import {db} from '@/src/lib/firebase'
+import { db } from '@/src/lib/firebase'
 
 type ProblemDescriptionProps = {
 	problem: Problem;
@@ -17,13 +17,68 @@ type ProblemDescriptionProps = {
 };
 
 const ProblemDescription: React.FC<ProblemDescriptionProps> = ({ problem, _solved }) => {
-	const {user} = useUserAuth();
-
-	
-
+	const { user } = useUserAuth();
 	const { currentProblem, loading, problemDifficultyClass, setCurrentProblem } = useGetCurrentProblem(problem.id);
 	const { liked, disliked, solved, setData, starred } = useGetUsersDataOnProblem(problem.id);
 	const [updating, setUpdating] = useState(false);
+
+	function useGetCurrentProblem(problemId: string) {
+		const [currentProblem, setCurrentProblem] = useState<DBProblem | null>(null);
+		const [loading, setLoading] = useState<boolean>(true);
+		const [problemDifficultyClass, setProblemDifficultyClass] = useState<string>("");
+
+		useEffect(() => {
+			// Get problem from DB
+			const getCurrentProblem = async () => {
+				setLoading(true);
+				const docRef = doc(db, "problems", problemId);
+				const docSnap = await getDoc(docRef);
+				if (docSnap.exists()) {
+					const problem = docSnap.data();
+					setCurrentProblem({ id: docSnap.id, ...problem } as DBProblem);
+					// easy, medium, hard
+					setProblemDifficultyClass(
+						problem.difficulty === "Easy"
+							? "bg-olive text-olive"
+							: problem.difficulty === "Medium"
+								? "bg-dark-yellow text-dark-yellow"
+								: " bg-dark-pink text-dark-pink"
+					);
+				}
+				setLoading(false);
+			};
+			getCurrentProblem();
+		}, [problemId]);
+
+		return { currentProblem, loading, problemDifficultyClass, setCurrentProblem };
+	}
+
+	function useGetUsersDataOnProblem(problemId: string) {
+		const [data, setData] = useState({ liked: false, disliked: false, starred: false, solved: false });
+		const { user } = useUserAuth();
+
+		useEffect(() => {
+			const getUsersDataOnProblem = async () => {
+				const userRef = doc(db, "users", user!.uid);
+				const userSnap = await getDoc(userRef);
+				if (userSnap.exists()) {
+					const data = userSnap.data();
+					const { solvedProblems, likedProblems, dislikedProblems, starredProblems } = data;
+					setData({
+						liked: likedProblems.includes(problemId), // likedProblems["two-sum","jump-game"]
+						disliked: dislikedProblems.includes(problemId),
+						starred: starredProblems.includes(problemId),
+						solved: solvedProblems.includes(problemId),
+					});
+				}
+			};
+
+			if (user) getUsersDataOnProblem();
+			return () => setData({ liked: false, disliked: false, starred: false, solved: false });
+		}, [problemId, user]);
+
+		return { ...data, setData };
+	}
 
 	const returnUserDataAndProblemData = async (transaction: any) => {
 		const userRef = doc(db, "users", user!.uid);
@@ -269,60 +324,3 @@ const ProblemDescription: React.FC<ProblemDescriptionProps> = ({ problem, _solve
 };
 export default ProblemDescription;
 
-function useGetCurrentProblem(problemId: string) {
-	const [currentProblem, setCurrentProblem] = useState<DBProblem | null>(null);
-	const [loading, setLoading] = useState<boolean>(true);
-	const [problemDifficultyClass, setProblemDifficultyClass] = useState<string>("");
-
-	useEffect(() => {
-		// Get problem from DB
-		const getCurrentProblem = async () => {
-			setLoading(true);
-			const docRef = doc(db, "problems", problemId);
-			const docSnap = await getDoc(docRef);
-			if (docSnap.exists()) {
-				const problem = docSnap.data();
-				setCurrentProblem({ id: docSnap.id, ...problem } as DBProblem);
-				// easy, medium, hard
-				setProblemDifficultyClass(
-					problem.difficulty === "Easy"
-						? "bg-olive text-olive"
-						: problem.difficulty === "Medium"
-						? "bg-dark-yellow text-dark-yellow"
-						: " bg-dark-pink text-dark-pink"
-				);
-			}
-			setLoading(false);
-		};
-		getCurrentProblem();
-	}, [problemId]);
-
-	return { currentProblem, loading, problemDifficultyClass, setCurrentProblem };
-}
-
-function useGetUsersDataOnProblem(problemId: string) {
-	const [data, setData] = useState({ liked: false, disliked: false, starred: false, solved: false });
-	const {user} = useUserAuth();
-
-	useEffect(() => {
-		const getUsersDataOnProblem = async () => {
-			const userRef = doc(db, "users", user!.uid);
-			const userSnap = await getDoc(userRef);
-			if (userSnap.exists()) {
-				const data = userSnap.data();
-				const { solvedProblems, likedProblems, dislikedProblems, starredProblems } = data;
-				setData({
-					liked: likedProblems.includes(problemId), // likedProblems["two-sum","jump-game"]
-					disliked: dislikedProblems.includes(problemId),
-					starred: starredProblems.includes(problemId),
-					solved: solvedProblems.includes(problemId),
-				});
-			}
-		};
-
-		if (user) getUsersDataOnProblem();
-		return () => setData({ liked: false, disliked: false, starred: false, solved: false });
-	}, [problemId, user]);
-
-	return { ...data, setData };
-}
