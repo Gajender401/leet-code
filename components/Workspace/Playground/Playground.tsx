@@ -12,7 +12,7 @@ import { problems } from "@/src/dummy/problems";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import useLocalStorage from "@/src/hooks/useLocalStorage";
 import { useUserAuth } from '@/src/context/UserAuthContext'
-import { useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { db } from "@/src/lib/firebase";
 
 type PlaygroundProps = {
@@ -34,8 +34,8 @@ const Playground: React.FC<PlaygroundProps> = ({ problem, setSuccess, setSolved 
 	const [fontSize, setFontSize] = useLocalStorage("lcc-fontSize", "16px");
 
 	const { user } = useUserAuth();
-	const searchParams = useSearchParams()
-	const id = searchParams.get('id')
+	const pathname = usePathname()
+	const id = pathname.split('/')[2]
 
 
 	const [settings, setSettings] = useState<ISettings>({
@@ -68,6 +68,8 @@ const Playground: React.FC<PlaygroundProps> = ({ problem, setSuccess, setSolved 
 			return;
 		}
 		try {
+			console.log(id);
+			
 			userCode = userCode.slice(userCode.indexOf(problem.starterFunctionName));
 			const cb = new Function(`return ${userCode}`)();
 			const handler = problems[id as string].handlerFunction;

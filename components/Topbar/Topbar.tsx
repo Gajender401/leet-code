@@ -11,7 +11,7 @@ import { problems } from "@/src/dummy/problems";
 import { Problem } from "@/src/types/problem";
 import { useUserAuth } from '@/src/context/UserAuthContext'
 import { FiLogOut } from "react-icons/fi";
-import { useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 
 type TopbarProps = {
@@ -21,9 +21,8 @@ type TopbarProps = {
 const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
     const { user, logOut } = useUserAuth()
     const router = useRouter();
-    const searchParams = useSearchParams()
- 
-    const id = searchParams.get('id')
+	const pathname = usePathname()
+	const id = pathname.split('/')[2]
 
     const handleLogout = () => {
 		logOut()
