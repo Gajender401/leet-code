@@ -1,11 +1,11 @@
 'use client'
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useUserAuth } from '@/src/context/UserAuthContext'
 import Navbar from "@/components/Navbar/page";
 import Image from "next/image";
-
+import { FcGoogle } from "react-icons/fc";
 
 type LoginProps = {};
 
@@ -13,7 +13,15 @@ const Login: React.FC<LoginProps> = () => {
 
     const [inputs, setInputs] = useState({ email: "", password: "" });
     const router = useRouter();
-    const {logIn} = useUserAuth()
+    const {user, logIn, googleOAuth} = useUserAuth()
+
+    useEffect(() => {
+        if (user) {
+            toast.success('Logged In successfully')
+            router.push('/')
+        }
+    }, [user])
+    
 
     const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -22,9 +30,7 @@ const Login: React.FC<LoginProps> = () => {
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!inputs.email || !inputs.password) return alert("Please fill all fields");
-        await logIn(inputs.email, inputs.password)
-        toast.success('Logged In successfully')
-        router.push('/')
+        logIn(inputs.email, inputs.password)
     };
 
 
@@ -67,7 +73,7 @@ const Login: React.FC<LoginProps> = () => {
                                 Sign In
                             </button>
                         </form>
-                        <p className="text-[#546e7a] w-full flex items-center justify-between mt-4">
+                        <p className="text-[#546e7a] w-full flex items-center justify-between mt-5">
                             <a href="/auth/resetPassword" >
                                 Forgot Password?
                             </a>
@@ -75,6 +81,10 @@ const Login: React.FC<LoginProps> = () => {
                                 Sign Up
                             </a>
                         </p>
+                        <p className="text-[#bdbdbd] text-[14px] mt-4 mb-4 ">
+                        or you can sign in with
+                        </p>
+                        <FcGoogle className="cursor-pointer" onClick={()=>googleOAuth()} size={40} />
                     </div>
                 </div>
             </div>

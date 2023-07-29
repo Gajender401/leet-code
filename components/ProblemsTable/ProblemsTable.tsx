@@ -10,7 +10,6 @@ import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/fires
 import { db } from "@/src/lib/firebase";
 import { DBProblem } from "@/src/types/problem";
 import { useUserAuth } from '@/src/context/UserAuthContext'
-import { problems } from "./mock";
 
 type ProblemsTableProps = {
 	setLoadingProblems: React.Dispatch<React.SetStateAction<boolean>>;
@@ -21,9 +20,8 @@ const ProblemsTable: React.FC<ProblemsTableProps> = ({ setLoadingProblems }) => 
 		isOpen: false,
 		videoId: "",
 	});
-	// const problems = useGetProblems(setLoadingProblems);
+	const problems = useGetProblems(setLoadingProblems);
 	const solvedProblems = useGetSolvedProblems();
-	console.log("solvedProblems", solvedProblems);
 	const closeModal = () => {
 		setYoutubePlayer({ isOpen: false, videoId: "" });
 	};
@@ -33,8 +31,7 @@ const ProblemsTable: React.FC<ProblemsTableProps> = ({ setLoadingProblems }) => 
 			if (e.key === "Escape") closeModal();
 		};
 		window.addEventListener("keydown", handleEsc);
-		// remove after production
-		setLoadingProblems(false)
+
 
 		return () => window.removeEventListener("keydown", handleEsc);
 	}, []);

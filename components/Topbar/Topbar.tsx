@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import React from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { BsList } from "react-icons/bs";
@@ -12,21 +12,41 @@ import { Problem } from "@/src/types/problem";
 import { useUserAuth } from '@/src/context/UserAuthContext'
 import { FiLogOut } from "react-icons/fi";
 import { usePathname } from 'next/navigation'
-
+import { db } from "@/src/lib/firebase"
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 type TopbarProps = {
     problemPage?: boolean;
 };
 
 const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
+
+    const [link, setLink] = useState('https://www.google.com/')
     const { user, logOut } = useUserAuth()
     const router = useRouter();
-	const pathname = usePathname()
-	const id = pathname.split('/')[2]
+    const pathname = usePathname()
+    const id = pathname.split('/')[2]
 
     const handleLogout = () => {
-		logOut()
-	};
+        logOut()
+    };
+
+    useEffect(() => {
+
+        const fetchData = async () => {
+            const userRef = doc(db, "link", 'website');
+            const userSnap = await getDoc(userRef);
+            
+            if (userSnap.exists()) {
+                setLink(userSnap.data()['link'])
+            }
+        }
+
+        return () => {
+            fetchData()
+        }
+    }, [])
+
 
     const handleProblemChange = (isForward: boolean) => {
         const { order } = problems[id as string] as Problem;
@@ -83,7 +103,7 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
                 <div className='flex items-center space-x-4 flex-1 justify-end'>
                     <div>
                         <a
-                            href='https://www.google.com/'
+                            href={link}
                             target='_blank'
                             rel='noreferrer'
                             className='bg-dark-fill-3 py-1.5 px-3 cursor-pointer rounded text-brand-orange hover:bg-dark-fill-2'
@@ -101,7 +121,7 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
                     {user && problemPage && <Timer />}
                     {user && (
                         <div className='cursor-pointer group relative'>
-                            <Image src='/avatar.png' alt='Avatar' width={30} height={30} className='rounded-full' />
+                            <Image src={user.photoURL ? user.photoURL : '/avatar.png'} alt='Avatar' width={30} height={30} className='rounded-full' />
                             <div
                                 className='absolute top-10 left-2/4 -translate-x-2/4  mx-auto bg-dark-layer-1 text-brand-orange p-2 rounded shadow-lg 
 								z-40 group-hover:scale-100 scale-0 
@@ -113,8 +133,8 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
                     )}
                     {user &&
                         <>
-                            <button className='bg-dark-fill-3 py-1.5 px-3 cursor-pointer rounded text-brand-orange' 
-                            onClick={handleLogout}
+                            <button className='bg-dark-fill-3 py-1.5 px-3 cursor-pointer rounded text-brand-orange'
+                                onClick={handleLogout}
                             >
                                 <FiLogOut />
                             </button>

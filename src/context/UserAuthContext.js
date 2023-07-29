@@ -12,7 +12,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import { db } from "../lib/firebase"
-import { doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 
 const userAuthContext = createContext();
@@ -25,7 +25,6 @@ export function UserAuthContextProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentuser) => {
       setUser(currentuser);
-      console.log(currentuser.uid);
       if (currentuser) {
         const userId = currentuser.uid
           const userRef = doc(db, "users", userId);
@@ -42,10 +41,7 @@ export function UserAuthContextProvider({ children }) {
               starredProblems: [],
             });
           }
-
       }
-
-
 
     });
 

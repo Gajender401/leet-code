@@ -1,11 +1,11 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { doc, setDoc } from "firebase/firestore";
 import { toast } from "react-hot-toast";
 import { useUserAuth } from '@/src/context/UserAuthContext'
 import Navbar from "@/components/Navbar/page";
 import Image from "next/image";
+import { FcGoogle } from "react-icons/fc";
 
 type SignupProps = {};
 
@@ -14,7 +14,14 @@ const Signup: React.FC<SignupProps> = () => {
     const [inputs, setInputs] = useState({ email: "", username: "", password: "" });
     const router = useRouter();
 
-    const { signUp } = useUserAuth()
+    const {user, signUp, googleOAuth } = useUserAuth()
+
+    useEffect(() => {
+        if (user) {
+            toast.success('Signed up successfully')
+            router.push('/')
+        }
+    }, [user])
 
     const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -29,6 +36,7 @@ const Signup: React.FC<SignupProps> = () => {
            router.push('/')
         }
     };
+
 
 
 
@@ -100,6 +108,8 @@ const Signup: React.FC<SignupProps> = () => {
                                 Sign In
                             </a>
                         </p>
+                        <FcGoogle className="cursor-pointer" onClick={()=>googleOAuth()} size={40} />
+
                     </div>
                 </div>
             </div>
