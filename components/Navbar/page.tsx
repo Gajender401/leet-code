@@ -16,11 +16,9 @@ const Navbar: React.FC<NavbarProps> = () => {
 			<div className='flex items-center'>
 
 				<button
-					className=' bg-white text-brand-orange px-2 py-1 sm:px-4 rounded-[4px] text-sm 
-                hover:text-white  hover:bg-brand-orange border-brand-orange border-[1px] 
-                transition duration-300 ease-in-out
-                '
-				>
+					className=' bg-white text-brand-orange px-2 py-1 sm:px-4 rounded-[4px] 
+					text-sm  hover:text-white  hover:bg-brand-orange border-brand-orange 
+					border-[1px] transition duration-300 ease-in-out'>
 					☆ Premium
 				</button>
 			</div>
